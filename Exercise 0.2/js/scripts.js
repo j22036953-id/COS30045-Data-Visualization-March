@@ -1,1 +1,0 @@
-console.log("Energy webpage loaded");

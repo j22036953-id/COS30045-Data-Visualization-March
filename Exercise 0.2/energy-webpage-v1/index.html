@@ -2,21 +2,56 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Energy Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Energy Appliance – COS30045</title>
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
     <header>
-        <img src="images/PowerIcon.png" alt="Power Icon" id="logo">
-        <h1>Energy Consumption Dashboard</h1>
+        <div class="logo">
+            <a href="#" id="logoLink">
+                <img src="images/PowerIcon.png" alt="Power Logo">
+            </a>
+        </div>
+        <nav>
+            <button class="nav-btn active" data-page="home">Home</button>
+            <button class="nav-btn" data-page="televisions">Televisions</button>
+            <button class="nav-btn" data-page="about">About Us</button>
+        </nav>
     </header>
+
     <main>
-        <h2>Energy Data (CSV)</h2>
-        <div id="data-table"></div>
+        <!-- Home Page -->
+        <div id="home" class="page active">
+            <h1>Welcome to Appliance Energy Insights</h1>
+            <p>Explore energy consumption patterns of household appliances in the Australian market. Understanding how much energy our devices use helps us make smarter choices for the environment and our wallets.</p>
+            <p>In Australia, appliances account for a significant portion of household energy use. From refrigerators to televisions, each device has a unique energy profile. This website aims to shed light on these patterns.</p>
+            <p>Use the menu above to explore data about televisions and learn more about our project.</p>
+        </div>
+
+        <!-- Televisions Page -->
+        <div id="televisions" class="page">
+            <h1>Television Energy Consumption</h1>
+            <p>Televisions are one of the most common appliances in Australian homes. Their energy consumption varies widely based on screen size, technology (LED, OLED, etc.), and efficiency ratings.</p>
+            <p>Here you will find data about energy sources and values.</p>
+            <div id="data-table"></div>
+            <p>Stay tuned for detailed analysis!</p>
+        </div>
+
+        <!-- About Us Page -->
+        <div id="about" class="page">
+            <h1>About This Project</h1>
+            <p>This website is part of COS30045 – Data Visualisation at Swinburne University of Technology. It demonstrates the use of HTML, CSS, and JavaScript to build interactive data‑driven websites.</p>
+            <p><strong>Data source:</strong> The energy dataset was provided as part of the course materials.</p>
+            <p><strong>GenAI acknowledgment:</strong> Artificial intelligence tools (e.g., GitHub Copilot, ChatGPT) were used to assist with generating code structure and styling. All generated code was reviewed, tested, and modified to meet project requirements.</p>
+            <p>For more information, please refer to the <code>README.md</code> file in the repository.</p>
+        </div>
     </main>
+
     <footer>
-        <p>COS30045 Data Visualisation – Exercise 0.2</p>
+        <p>&copy; 2026 Teoh Thong Yee | GenAI assisted development</p>
     </footer>
+
     <script src="js/scripts.js"></script>
 </body>
 </html>

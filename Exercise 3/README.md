@@ -12,6 +12,10 @@ You must use the **Exercise 3 folder in your existing forked repository** and re
 
 ## Data Story
 
+**Target Audience:** Cost-conscious Australian families and students.
+**Audience Needs:** This group is looking for a new television but is concerned about both the upfront purchase price and the long-term impact on their electricity bills.
+**The Narrative:** This story guides a shopper through the Australian market, showing that while variety is high, energy costs can vary wildly based on size and brand choice.
+
 ### Audience
 
 The target audience for this visualisation includes:
@@ -38,6 +42,12 @@ The website presents these insights through visualisations and explanatory text 
 ---
 
 ## About the Data
+
+**Data Source:** This dataset is published by the Australian Government and contains energy consumption information for televisions sold in Australia.
+**Data Processing:** Data was cleaned using KNIME. This included removing duplicate models, filtering for "Available" models, and transforming screen sizes from centimeters to inches.
+**Privacy:** The dataset focuses solely on product specifications; it contains no personal or sensitive information.
+**Accuracy and Limitations:** The data is based on standardized government testing. Real-world consumption may vary based on user settings like brightness. 
+**Ethics:** This project follows ethical practices by representing data transparently, avoiding misleading scales, and clearly explaining the context of the Australian market.
 
 ### Data Source
 
@@ -80,6 +90,7 @@ This project follows ethical data visualisation practices by:
 ---
 
 ## AI Declaration
+I used Gemini (Google’s AI) to help draft the narrative structure, refine the technical configuration of the KNIME nodes, and assist with the documentation writing.
 
 Artificial Intelligence (AI) tools may have been used to assist with aspects of this assignment, such as:
 

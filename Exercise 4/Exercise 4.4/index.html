@@ -2,20 +2,98 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Exercise 4.4 - Load and Inspect Data</title>
     <style>
-        .responsive-svg-container {
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f0e0;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1000px;
             margin: 0 auto;
-            width: 100%;
-            max-width: 800px;
+            background: white;
+            padding: 2rem;
+            border-radius: 24px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        h1 { color: #c45c00; border-left: 5px solid #fb8c00; padding-left: 1rem; }
+        pre {
+            background: #f0f0f0;
+            padding: 15px;
+            border-radius: 12px;
+            overflow-x: auto;
+            font-size: 14px;
+        }
+        .info-box {
+            background: #e8f5e9;
+            padding: 15px;
+            border-radius: 12px;
+            margin: 20px 0;
         }
     </style>
 </head>
 <body>
-    <h1>TV Brand Model Counts</h1>
-    <div class="responsive-svg-container"></div>
+    <div class="container">
+        <h1>TV Brand Model Counts - Data Inspection</h1>
+        <div id="output" class="info-box">
+            <p>Loading data...</p>
+        </div>
+        <div class="responsive-svg-container"></div>
+    </div>
 
     <script src="https://d3js.org/d3.v7.min.js"></script>
-    <script src="js/d3-script.js"></script>
+    <script>
+        // This script loads the CSV and displays the required info on the page
+        const outputDiv = document.getElementById("output");
+
+        d3.csv("data/TV_CLEANED.csv", d => {
+            // Convert numeric column (adjust column name if needed)
+            return {
+                brand: d.Brand_Reg,
+                count: +d.Model_No   // Change 'Model_No' if your column name is different
+            };
+        }).then(data => {
+            // Filter out rows with invalid count
+            const validData = data.filter(d => !isNaN(d.count) && d.brand);
+            
+            // Compute required values
+            const rowCount = validData.length;
+            const maxCount = d3.max(validData, d => d.count);
+            const minCount = d3.min(validData, d => d.count);
+            const extent = d3.extent(validData, d => d.count);
+            
+            // Sort descending
+            validData.sort((a, b) => b.count - a.count);
+            const top10 = validData.slice(0, 10);
+            
+            // Display on the page
+            outputDiv.innerHTML = `
+                <h3>✅ CSV Loaded Successfully</h3>
+                <p><strong>Total rows:</strong> ${rowCount}</p>
+                <p><strong>Max count:</strong> ${maxCount}</p>
+                <p><strong>Min count:</strong> ${minCount}</p>
+                <p><strong>Extent (min, max):</strong> [${extent[0]}, ${extent[1]}]</p>
+                <p><strong>Sorted data (top 10 by count):</strong></p>
+                <pre>${JSON.stringify(top10, null, 2)}</pre>
+                <p>✅ Data inspection complete. Ready for Exercise 4.5 (bar chart).</p>
+            `;
+            
+            // Also log to console (optional)
+            console.log("CSV loaded. Rows:", rowCount);
+            console.log("Max:", maxCount, "Min:", minCount, "Extent:", extent);
+            console.log("Top 10 brands:", top10);
+        }).catch(error => {
+            outputDiv.innerHTML = `
+                <h3>❌ Error loading CSV</h3>
+                <p>Could not load data/TV_CLEANED.csv</p>
+                <p>Make sure the file exists and has columns 'Brand_Reg' and 'Model_No'.</p>
+                <p>Error details: ${error.message}</p>
+            `;
+            console.error("CSV load error:", error);
+        });
+    </script>
 </body>
 </html>

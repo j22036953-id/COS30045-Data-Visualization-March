@@ -3,483 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TV Energy Consumption | COS30045</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <title>Exercise 4.4 - Load and Inspect Data</title>
     <style>
-        /* ========== MODERN PROFESSIONAL RESET & GLOBAL ========== */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background: linear-gradient(135deg, #f5f7fc 0%, #eef2f6 100%);
-            color: #1e2a3e;
-            line-height: 1.5;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f0e0;
+            margin: 0;
+            padding: 20px;
         }
-
-        /* Smooth scroll & better font rendering */
-        html {
-            scroll-behavior: smooth;
-            -webkit-font-smoothing: antialiased;
-        }
-
-        /* ========== HEADER & NAVIGATION ========== */
-        header {
-            background: #0f172a;
-            backdrop-filter: blur(4px);
-            padding: 0.75rem 2rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 1rem;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .logo img {
-            height: 48px;
-            width: auto;
-            cursor: pointer;
-            transition: opacity 0.2s ease;
-        }
-        .logo img:hover { opacity: 0.85; }
-
-        nav {
-            display: flex;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-        }
-
-        .nav-btn {
-            background: transparent;
-            border: none;
-            color: #e2e8f0;
-            font-size: 0.95rem;
-            font-weight: 500;
-            padding: 0.6rem 1.3rem;
-            cursor: pointer;
-            border-radius: 40px;
-            transition: all 0.2s ease;
-            letter-spacing: 0.3px;
-        }
-
-        .nav-btn:hover {
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            transform: translateY(-1px);
-        }
-
-        .nav-btn.active {
-            background: #3b82f6;
-            color: white;
-            box-shadow: 0 2px 6px rgba(59,130,246,0.3);
-        }
-
-        /* ========== MAIN CONTAINER (CARD) ========== */
-        main {
-            flex: 1;
-            max-width: 1300px;
-            margin: 2rem auto;
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
             background: white;
-            border-radius: 28px;
-            box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.1);
-            width: calc(100% - 2rem);
-            transition: all 0.2s;
-        }
-
-        .page {
-            display: none;
-            padding: 2rem 2rem 2.5rem;
-        }
-
-        .page.active {
-            display: block;
-            animation: fadeIn 0.3s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(8px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* ========== TYPOGRAPHY ========== */
-        h1 {
-            font-size: 2rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, #0f172a, #2d3a5e);
-            background-clip: text;
-            -webkit-background-clip: text;
-            color: transparent;
-            border-left: 5px solid #3b82f6;
-            padding-left: 1.25rem;
-            margin-bottom: 1.75rem;
-            letter-spacing: -0.3px;
-        }
-
-        h2 {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: #0f172a;
-            margin: 2rem 0 1rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 2px solid #e2e8f0;
-        }
-
-        p {
-            margin-bottom: 1rem;
-            color: #2d3a5e;
-        }
-
-        .story-intro {
-            background: #eff6ff;
-            padding: 1.5rem;
-            border-radius: 20px;
-            border-left: 5px solid #3b82f6;
-            font-size: 1.05rem;
-            margin: 1rem 0 2rem;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-        }
-
-        /* ========== DATA STORY SECTIONS ========== */
-        .story-section {
-            margin-bottom: 3rem;
-            background: #fefefe;
-            border-radius: 20px;
-            padding: 1.25rem 1.5rem;
-            transition: box-shadow 0.2s;
-            border: 1px solid #edf2f7;
-        }
-        .story-section:hover {
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
-        }
-
-        .chart-container {
-            margin: 1.8rem auto;
-            max-width: 90%;
-            text-align: center;
-            background: #fafcff;
-            padding: 1rem;
+            padding: 2rem;
             border-radius: 24px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
-
-        .chart-image {
-            max-width: 100%;
-            height: auto;
-            border-radius: 16px;
-            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
-            transition: transform 0.2s ease;
-        }
-        .chart-image:hover {
-            transform: scale(1.01);
-        }
-
-        .insight-note {
-            font-style: normal;
-            background: #f8fafc;
-            color: #1e293b;
-            padding: 0.9rem 1.2rem;
-            border-radius: 16px;
-            margin-top: 1rem;
-            border-left: 3px solid #3b82f6;
-            font-size: 0.95rem;
-        }
-
-        .story-conclusion {
-            background: linear-gradient(120deg, #f0f9ff, #eef2ff);
-            padding: 1.8rem 2rem;
-            border-radius: 24px;
-            margin-top: 2.5rem;
-            border: 1px solid #d9e6ff;
-        }
-
-        .story-conclusion ul {
-            margin-left: 1.8rem;
-            margin-top: 0.8rem;
-            margin-bottom: 1rem;
-        }
-        .story-conclusion li {
-            margin-bottom: 0.6rem;
-            line-height: 1.4;
-        }
-
-        /* ========== TABLE (DATA PAGE) ========== */
-        .table-wrapper {
+        h1 { color: #c45c00; border-left: 5px solid #fb8c00; padding-left: 1rem; }
+        pre {
+            background: #f0f0f0;
+            padding: 15px;
+            border-radius: 12px;
             overflow-x: auto;
-            border-radius: 20px;
-            border: 1px solid #e2e8f0;
-            background: white;
-            margin: 1.5rem 0;
+            font-size: 14px;
         }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.85rem;
-        }
-        th {
-            background: #f1f5f9;
-            color: #0f172a;
-            font-weight: 600;
-            padding: 12px 12px;
-            border-bottom: 1px solid #cbd5e1;
-            text-align: left;
-        }
-        td {
-            padding: 10px 12px;
-            border-bottom: 1px solid #eef2f6;
-            color: #1e2a3e;
-        }
-        tr:hover td {
-            background-color: #fafcff;
-        }
-
-        /* ========== FOOTER ========== */
-        footer {
-            text-align: center;
-            padding: 1.2rem;
-            background: #0f172a;
-            color: #94a3b8;
-            font-size: 0.85rem;
-            margin-top: 2rem;
-            border-top: 1px solid #1e293b;
-        }
-
-        /* ========== RESPONSIVE ========== */
-        @media (max-width: 768px) {
-            header {
-                flex-direction: column;
-                text-align: center;
-                padding: 1rem;
-            }
-            main {
-                margin: 1rem;
-                width: calc(100% - 2rem);
-            }
-            .page {
-                padding: 1.2rem;
-            }
-            h1 {
-                font-size: 1.6rem;
-                padding-left: 0.8rem;
-            }
-            h2 {
-                font-size: 1.3rem;
-            }
-            .chart-container {
-                max-width: 100%;
-                padding: 0.5rem;
-            }
-            .nav-btn {
-                padding: 0.4rem 1rem;
-                font-size: 0.85rem;
-            }
+        .info-box {
+            background: #e8f5e9;
+            padding: 15px;
+            border-radius: 12px;
+            margin: 20px 0;
         }
     </style>
 </head>
 <body>
-    <header>
-        <div class="logo" id="logoLink">
-            <img src="images/PowerIcon.png" alt="Appliance Energy Insights Logo">
+    <div class="container">
+        <h1>TV Brand Model Counts - Data Inspection</h1>
+        <div id="output" class="info-box">
+            <p>Loading data...</p>
         </div>
-        <nav>
-            <button class="nav-btn active" data-page="home">Home</button>
-            <button class="nav-btn" data-page="television">Television</button>
-            <button class="nav-btn" data-page="story">Data Story</button>
-            <button class="nav-btn" data-page="about">About</button>
-        </nav>
-    </header>
+        <div class="responsive-svg-container"></div>
+    </div>
 
-    <main>
-        <!-- HOME PAGE -->
-        <section id="home" class="page active">
-            <h1>Welcome to Appliance Energy Insights</h1>
-            <p>Explore energy consumption patterns of household appliances in the Australian market. Understanding how much energy our devices use helps us make smarter choices for our wallets and the environment.</p>
-            <p>In Australia, appliances account for a significant portion of household energy consumption. From refrigerators to televisions, each device has a unique energy profile. This website aims to shed light on these patterns.</p>
-            <p>Use the menu above to explore a data-driven story about televisions and learn more about this project.</p>
-            <h2>Television Energy Consumption</h2>
-            <p>Televisions are one of the most common appliances in Australian homes. Their energy consumption varies widely based on screen size, technology (LED, OLED, etc.), and efficiency ratings.</p>
-            <p>Here you will find data-driven insights, visualisations, and practical advice for buying an energy-efficient TV.</p>
-        </section>
-
-        <!-- TELEVISION PAGE (Data Table) -->
-        <section id="television" class="page">
-            <h1>📺 Television Energy Consumption – Raw Data</h1>
-            <p>Below is the complete dataset used for this analysis, as provided by the Australian Government. It contains information about TV models, screen sizes, power consumption, and energy ratings.</p>
-            <div id="csvTable" class="table-wrapper"></div>
-            <p><em>Data loaded from <code>data/data.csv</code> using PapaParse.</em></p>
-        </section>
-
-        <!-- DATA STORY PAGE (Exactly 6 sections) -->
-        <section id="story" class="page">
-            <h1>📺 The Smart Shopper's Guide to TV Energy Costs in Australia</h1>
-            <p class="story-intro">Buying a new TV? The upfront price is important, but for cost‑conscious families and students, the <strong>real cost over time can add up on your electricity bill</strong>. This data story guides you through the Australian TV market, showing how energy consumption varies dramatically based on your choice.</p>
-
-            <div class="story-section">
-                <h2>1. The Australian TV Market: Many Choices, One Clear Leader</h2>
-                <p>The Australian market offers a wide range of TV screen technologies. As our analysis shows, <strong>LCD (LED) technology is the most dominant</strong>, representing the vast majority of available models.</p>
-                <div class="chart-container">
-                    <img src="images/Q1_chart.png" alt="Bar chart: Number of TV models by technology" class="chart-image">
-                </div>
-                <p class="insight-note">You'll have the most options when choosing an LED TV. But energy efficiency varies, so it's important to look beyond just the technology type.</p>
-            </div>
-
-            <div class="story-section">
-                <h2>2. Screen Sizes: Something for Everyone</h2>
-                <p>Manufacturers offer a diverse range of screen sizes, from compact 32-inch models to massive 100-inch home cinema displays. The distribution shows a preference for popular sizes like 50, 55, and 65 inches.</p>
-                <div class="chart-container">
-                    <img src="images/Q2_chart.png" alt="Bar chart: Market presence by screen size" class="chart-image">
-                </div>
-                <p class="insight-note">The wide variety means there's a TV for every room, from a bedroom to a living area.</p>
-            </div>
-
-            <div class="story-section">
-                <h2>3. Brand Power: Who Offers the Most Choice?</h2>
-                <p><strong>Samsung, LG, and Diviox</strong> lead the market in terms of product variety, giving consumers plenty of options to choose from.</p>
-                <div class="chart-container">
-                    <img src="images/Q3_chart.png" alt="Bar chart: Number of models by brand" class="chart-image">
-                </div>
-                <p class="insight-note">More models don't always mean more energy efficient. It pays to compare.</p>
-            </div>
-
-            <div class="story-section">
-                <h2>4. Technology & Power: The Standout Energy Miser</h2>
-                <p><strong>Standard LCD technology has the lowest average power consumption</strong>, using significantly less energy than both LED-backlit LCDs (LCD LED) and OLED displays.</p>
-                <div class="chart-container">
-                    <img src="images/Q4_chart.png" alt="Bar chart: Average power consumption by technology" class="chart-image">
-                </div>
-                <p class="insight-note">If minimising your electricity bill is your top priority, a standard LCD TV is your most energy‑efficient choice.</p>
-            </div>
-
-            <div class="story-section">
-                <h2>5. The Bigger They Are, The More They Consume</h2>
-                <p><strong>Larger screen sizes directly lead to higher power consumption</strong>. The scatter plot below clearly shows a positive correlation. Every extra inch adds to the energy bill.</p>
-                <div class="chart-container">
-                    <img src="images/Q5_chart.png" alt="Scatter plot: Screen size vs. Power consumption" class="chart-image">
-                </div>
-                <p class="insight-note">Choosing a smaller screen is one of the most effective ways to keep your electricity costs down.</p>
-            </div>
-
-            <div class="story-section">
-                <h2>6. Star Ratings: Not as Straightforward as You Think</h2>
-                <p>Our analysis shows a <strong>weak and inconsistent relationship</strong> between star rating and screen size. A large TV can still have a good star rating, and a small TV might have a poor one. Don't rely on stars alone.</p>
-                <div class="chart-container">
-                    <img src="images/Q6_chart.png" alt="Scatter plot: Star rating vs. Screen size" class="chart-image">
-                </div>
-                <p class="insight-note">Always compare the energy consumption number (in kWh per year) on the label, not just the stars, to get a true picture of running costs.</p>
-            </div>
-
-            <div class="story-conclusion">
-                <h2>💡 Key Takeaways for the Smart Shopper</h2>
-                <ul>
-                    <li><strong>Prioritise size:</strong> The biggest factor in power consumption is screen size. Choose the smallest size you can comfortably live with.</li>
-                    <li><strong>Consider technology:</strong> Standard LCD TVs are typically the most energy‑efficient, though you may compromise on picture quality compared to LED or OLED.</li>
-                    <li><strong>Check the label:</strong> When comparing similar‑sized TVs, look at the yearly energy consumption (kWh/year) on the Energy Rating Label, not just the star rating.</li>
-                    <li><strong>Compare brands:</strong> Don't assume all brands are equal. Our data shows significant variation, so compare models side‑by‑side.</li>
-                    <li><strong>Calculate your cost:</strong> A TV that uses 213 kWh/year will cost about $60/year to run (at $0.28/kWh). A 520 kWh/year TV costs ~$146/year. That difference adds up over a few years!</li>
-                </ul>
-                <p>By making an informed choice, you can enjoy your new TV without the shock of a high electricity bill. Happy (energy‑efficient) viewing!</p>
-            </div>
-        </section>
-
-        <!-- ABOUT PAGE -->
-        <section id="about" class="page">
-            <h1>About This Project</h1>
-            <p>This website is part of <strong>COS30045 – Data Visualisation</strong> at Swinburne University of Technology. It demonstrates the use of HTML, CSS, and JavaScript to build an interactive, data‑driven website.</p>
-            <h2>About the Data</h2>
-            <p><strong>Data Source:</strong> Australian Government dataset on TV energy consumption.</p>
-            <p><strong>Data Processing:</strong> Cleaned using KNIME (removed duplicates, filtered for "Available" models, converted cm to inches).</p>
-            <h2>Privacy & Ethics</h2>
-            <p>The dataset contains no personal information. All visualisations follow ethical practices (no misleading scales, clear context).</p>
-            <h2>AI Declaration</h2>
-            <p>I used Gemini (Google's AI) to help draft the narrative structure and refine the technical configuration of the KNIME nodes. All AI-generated assistance was reviewed and integrated responsibly.</p>
-            <p>© 2026 Teoh Thong Yee | GenAI assisted development</p>
-        </section>
-    </main>
-
-    <footer>
-        <p>© 2026 Teoh Thong Yee | Data Visualisation Assignment</p>
-    </footer>
-
+    <script src="https://d3js.org/d3.v7.min.js"></script>
     <script>
-        // Navigation logic
-        const logo = document.getElementById('logoLink');
-        const navButtons = document.querySelectorAll('.nav-btn');
-        const pages = document.querySelectorAll('.page');
+        // This script loads the CSV and displays the required info on the page
+        const outputDiv = document.getElementById("output");
 
-        function showPage(pageId) {
-            pages.forEach(page => page.classList.remove('active'));
-            const activePage = document.getElementById(pageId);
-            if (activePage) activePage.classList.add('active');
-            navButtons.forEach(btn => {
-                btn.classList.remove('active');
-                if (btn.getAttribute('data-page') === pageId) {
-                    btn.classList.add('active');
-                }
-            });
-        }
-
-        navButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                const pageId = button.getAttribute('data-page');
-                showPage(pageId);
-            });
+        d3.csv("data/TV_CLEANED.csv", d => {
+            // Convert numeric column (adjust column name if needed)
+            return {
+                brand: d.Brand_Reg,
+                count: +d.Model_No   // Change 'Model_No' if your column name is different
+            };
+        }).then(data => {
+            // Filter out rows with invalid count
+            const validData = data.filter(d => !isNaN(d.count) && d.brand);
+            
+            // Compute required values
+            const rowCount = validData.length;
+            const maxCount = d3.max(validData, d => d.count);
+            const minCount = d3.min(validData, d => d.count);
+            const extent = d3.extent(validData, d => d.count);
+            
+            // Sort descending
+            validData.sort((a, b) => b.count - a.count);
+            const top10 = validData.slice(0, 10);
+            
+            // Display on the page
+            outputDiv.innerHTML = `
+                <h3>✅ CSV Loaded Successfully</h3>
+                <p><strong>Total rows:</strong> ${rowCount}</p>
+                <p><strong>Max count:</strong> ${maxCount}</p>
+                <p><strong>Min count:</strong> ${minCount}</p>
+                <p><strong>Extent (min, max):</strong> [${extent[0]}, ${extent[1]}]</p>
+                <p><strong>Sorted data (top 10 by count):</strong></p>
+                <pre>${JSON.stringify(top10, null, 2)}</pre>
+                <p>✅ Data inspection complete. Ready for Exercise 4.5 (bar chart).</p>
+            `;
+            
+            // Also log to console (optional)
+            console.log("CSV loaded. Rows:", rowCount);
+            console.log("Max:", maxCount, "Min:", minCount, "Extent:", extent);
+            console.log("Top 10 brands:", top10);
+        }).catch(error => {
+            outputDiv.innerHTML = `
+                <h3>❌ Error loading CSV</h3>
+                <p>Could not load data/TV_CLEANED.csv</p>
+                <p>Make sure the file exists and has columns 'Brand_Reg' and 'Model_No'.</p>
+                <p>Error details: ${error.message}</p>
+            `;
+            console.error("CSV load error:", error);
         });
-
-        if (logo) {
-            logo.addEventListener('click', (e) => {
-                e.preventDefault();
-                showPage('home');
-            });
-        }
-
-        showPage('home');
-
-        // Load CSV and display table (enhanced with wrapper)
-        function loadCSVAndDisplay() {
-            const csvUrl = './data/data.csv';
-            Papa.parse(csvUrl, {
-                download: true,
-                header: true,
-                skipEmptyLines: true,
-                complete: function(results) {
-                    const data = results.data;
-                    if (data.length === 0) {
-                        document.getElementById('csvTable').innerHTML = '<p>No data found.</p>';
-                        return;
-                    }
-                    let tableHtml = '<table><thead><tr>';
-                    Object.keys(data[0]).forEach(key => {
-                        tableHtml += `<th>${key}</th>`;
-                    });
-                    tableHtml += '</tr></thead><tbody>';
-                    data.forEach(row => {
-                        tableHtml += '<tr>';
-                        Object.values(row).forEach(value => {
-                            tableHtml += `<td>${value === undefined ? '' : value}</td>`;
-                        });
-                        tableHtml += '</tr>';
-                    });
-                    tableHtml += '</tbody></table>';
-                    // Wrap table in a div with overflow for responsiveness
-                    document.getElementById('csvTable').innerHTML = `<div class="table-wrapper">${tableHtml}</div>`;
-                },
-                error: function(error) {
-                    console.error('CSV load error:', error);
-                    document.getElementById('csvTable').innerHTML = '<p>Error loading CSV. Make sure the file exists at <code>data/data.csv</code>.</p>';
-                }
-            });
-        }
-
-        loadCSVAndDisplay();
     </script>
 </body>
 </html>

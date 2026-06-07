@@ -5,11 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Exercise 5 – TV Energy Dashboard</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: #f5f0e0;
@@ -47,7 +43,6 @@
             border: 1px solid #ffe0b5;
             display: flex;
             flex-direction: column;
-            overflow: visible;   /* prevent clipping */
         }
         .chart-title {
             text-align: center;
@@ -62,7 +57,6 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            overflow: visible;
         }
         footer {
             text-align: center;
@@ -73,9 +67,7 @@
             padding-top: 1rem;
         }
         @media (max-width: 700px) {
-            .chart-grid {
-                grid-template-columns: 1fr;
-            }
+            .chart-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -90,7 +82,7 @@
             <div id="donut-chart" class="responsive-svg-container"></div>
         </div>
         <div class="chart-card">
-            <div class="chart-title">Avg Power for 55‑inch TVs</div>
+            <div class="chart-title">Number of Models by Brand (Top 10)</div>
             <div id="bar-chart" class="responsive-svg-container"></div>
         </div>
         <div class="chart-card">
@@ -106,9 +98,159 @@
 </div>
 
 <script src="https://d3js.org/d3.v7.min.js"></script>
-<script src="js/donut-chart.js"></script>
-<script src="js/bar-chart.js"></script>
-<script src="js/scatter-plot.js"></script>
-<script src="js/line-chart.js"></script>
+<script>
+    // DONUT CHART (with legend, increased width)
+    (function() {
+        const width = 650, height = 550, radius = Math.min(width, height) / 2;
+        const svg = d3.select("#donut-chart")
+            .append("svg").attr("viewBox", `0 0 ${width} ${height}`)
+            .style("background", "#faf8f0")
+            .append("g").attr("transform", `translate(${width/2}, ${height/2})`);
+
+        d3.csv("data/TV_CLEANED.csv").then(data => {
+            const col = data[0].hasOwnProperty("Screen_Tech") ? "Screen_Tech" : "Screen_Techn";
+            if (!col) throw new Error("No screen tech column");
+            const counts = new Map();
+            data.forEach(d => {
+                const tech = d[col];
+                if (tech && tech.trim()) counts.set(tech, (counts.get(tech)||0)+1);
+            });
+            if (counts.size === 0) throw new Error("No data");
+            const pieData = Array.from(counts, ([tech, count]) => ({ tech, count }));
+            const total = pieData.reduce((s, d) => s + d.count, 0);
+            const color = d3.scaleOrdinal().domain(pieData.map(d => d.tech)).range(d3.schemeTableau10);
+            const pie = d3.pie().value(d => d.count).sort(null);
+            const arcGen = d3.arc().innerRadius(radius*0.4).outerRadius(radius*0.8).padAngle(0.02).cornerRadius(4);
+            const arcs = pie(pieData);
+            const groups = svg.selectAll("g").data(arcs).join("g");
+            groups.append("path")
+                .attr("d", arcGen)
+                .attr("fill", d => color(d.data.tech))
+                .attr("stroke", "white").style("stroke-width", "2px");
+            groups.append("text")
+                .attr("transform", d => `translate(${arcGen.centroid(d)})`)
+                .attr("text-anchor", "middle").attr("dominant-baseline", "middle")
+                .style("font-size", "12px").style("fill", "white")
+                .text(d => `${Math.round((d.data.count/total)*100)}%`);
+            // Legend
+            const legend = svg.append("g").attr("transform", `translate(${radius+10}, ${-radius+20})`);
+            pieData.forEach((d, i) => {
+                const row = legend.append("g").attr("transform", `translate(0, ${i*22})`);
+                row.append("rect").attr("width", 14).attr("height", 14).attr("fill", color(d.tech));
+                row.append("text").attr("x", 20).attr("y", 12).text(d.tech).style("font-size", "12px");
+            });
+        }).catch(e => { console.error(e); d3.select("#donut-chart").append("p").text("Error loading data").style("color","red"); });
+    })();
+
+    // BAR CHART (Number of Models by Brand - Top 10)
+    (function() {
+        const margin = {top:70, right:40, bottom:100, left:80}, w=600, h=500;
+        const iw = w - margin.left - margin.right, ih = h - margin.top - margin.bottom;
+        const svg = d3.select("#bar-chart").append("svg").attr("viewBox", `0 0 ${w} ${h}`)
+            .append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+
+        d3.csv("data/TV_CLEANED.csv").then(data => {
+            const brandCounts = new Map();
+            data.forEach(d => {
+                const brand = d.Brand_Reg;
+                if (brand && brand.trim()) brandCounts.set(brand, (brandCounts.get(brand)||0)+1);
+            });
+            if (brandCounts.size === 0) {
+                svg.append("text").text("No brand data").attr("x",10).attr("y",20).attr("fill","red");
+                return;
+            }
+            let brandArray = Array.from(brandCounts, ([brand, count]) => ({ brand, count }));
+            brandArray.sort((a,b) => b.count - a.count);
+            const topBrands = brandArray.slice(0, 10);
+            const x = d3.scaleBand().domain(topBrands.map(d => d.brand)).range([0, iw]).padding(0.2);
+            const y = d3.scaleLinear().domain([0, d3.max(topBrands, d => d.count)]).range([ih, 0]);
+            svg.selectAll("rect").data(topBrands).join("rect")
+                .attr("x", d => x(d.brand)).attr("y", d => y(d.count))
+                .attr("width", x.bandwidth()).attr("height", d => ih - y(d.count))
+                .attr("fill", "#fb8c00").attr("rx", 4);
+            svg.append("g").attr("transform", `translate(0,${ih})`).call(d3.axisBottom(x))
+                .selectAll("text").attr("transform","rotate(-30)").style("text-anchor","end").attr("dx","-0.5em").attr("dy","0.5em");
+            svg.append("g").call(d3.axisLeft(y));
+            svg.append("text").attr("x", iw/2).attr("y", ih+50).attr("text-anchor","middle").text("Brand");
+            svg.append("text")
+                .attr("transform", "rotate(-90)")
+                .attr("x", -ih/2)
+                .attr("y", -50)
+                .attr("text-anchor", "middle")
+                .style("font-size", "12px")
+                .text("Number of Models");
+        }).catch(e => console.error(e));
+    })();
+
+    // SCATTER PLOT (size vs power)
+    (function() {
+        const margin = {top:70, right:40, bottom:80, left:80}, w=600, h=500;
+        const iw = w - margin.left - margin.right, ih = h - margin.top - margin.bottom;
+        const svg = d3.select("#scatter-plot").append("svg").attr("viewBox", `0 0 ${w} ${h}`)
+            .append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+
+        d3.csv("data/TV_CLEANED.csv").then(data => {
+            const sizeCol = data[0].hasOwnProperty("screensize_inches") ? "screensize_inches" : "screenshot_inches";
+            const filtered = data.filter(d => {
+                const size = +d[sizeCol];
+                const power = +d.Avg_mode_power;
+                return !isNaN(size) && !isNaN(power) && size > 0 && power > 0;
+            });
+            if (filtered.length === 0) {
+                svg.append("text").text("No valid data").attr("x",10).attr("y",20).attr("fill","red");
+                return;
+            }
+            const x = d3.scaleLinear().domain([0, d3.max(filtered, d => +d[sizeCol])]).range([0, iw]);
+            const y = d3.scaleLinear().domain([0, d3.max(filtered, d => +d.Avg_mode_power)]).range([ih, 0]);
+            svg.selectAll("circle").data(filtered).join("circle")
+                .attr("cx", d => x(+d[sizeCol]))
+                .attr("cy", d => y(+d.Avg_mode_power))
+                .attr("r", 3).attr("fill", "#1f77b4").attr("opacity", 0.5);
+            svg.append("g").attr("transform", `translate(0,${ih})`).call(d3.axisBottom(x));
+            svg.append("g").call(d3.axisLeft(y));
+            svg.append("text").attr("x", iw/2).attr("y", ih+45).attr("text-anchor","middle").text("Screen Size (inches)");
+            svg.append("text")
+                .attr("transform", "rotate(-90)")
+                .attr("x", -ih/2)
+                .attr("y", -50)
+                .attr("text-anchor", "middle")
+                .style("font-size", "12px")
+                .text("Power Consumption (Watts)");
+        }).catch(e => console.error(e));
+    })();
+
+    // LINE CHART (power prices)
+    (function() {
+        const margin = {top:70, right:40, bottom:80, left:80}, w=600, h=500;
+        const iw = w - margin.left - margin.right, ih = h - margin.top - margin.bottom;
+        const svg = d3.select("#line-chart").append("svg").attr("viewBox", `0 0 ${w} ${h}`)
+            .append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+        const data = [
+            {year:1998, price:25}, {year:2000, price:28}, {year:2002, price:35},
+            {year:2004, price:42}, {year:2006, price:55}, {year:2008, price:70},
+            {year:2010, price:65}, {year:2012, price:60}, {year:2014, price:75},
+            {year:2016, price:80}, {year:2018, price:90}, {year:2020, price:85},
+            {year:2022, price:110}, {year:2024, price:120}
+        ];
+        const x = d3.scaleLinear().domain([1998, 2024]).range([0, iw]);
+        const y = d3.scaleLinear().domain([0, d3.max(data, d => d.price)]).range([ih, 0]);
+        const line = d3.line().x(d => x(d.year)).y(d => y(d.price)).curve(d3.curveCatmullRom);
+        svg.append("path").attr("d", line(data)).attr("fill", "none").attr("stroke", "#e67a00").attr("stroke-width", 3);
+        svg.selectAll("circle").data(data).join("circle")
+            .attr("cx", d => x(d.year)).attr("cy", d => y(d.price))
+            .attr("r", 5).attr("fill", "#e67a00").attr("stroke", "white").attr("stroke-width", 1.5);
+        svg.append("g").attr("transform", `translate(0,${ih})`)
+            .call(d3.axisBottom(x).tickValues([1998,2002,2006,2010,2014,2018,2022,2024]).tickFormat(d3.format("d")));
+        svg.append("g").call(d3.axisLeft(y));
+        svg.append("text").attr("x", iw/2).attr("y", ih+45).attr("text-anchor","middle").text("Year");
+        svg.append("text")
+            .attr("transform", "rotate(-90)")
+            .attr("x", -ih/2)
+            .attr("y", -50)
+            .attr("text-anchor", "middle")
+            .style("font-size", "12px")
+            .text("Spot Price ($/MWh)");
+    })();
+</script>
 </body>
 </html>

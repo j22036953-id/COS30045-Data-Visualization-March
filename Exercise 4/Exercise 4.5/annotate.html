@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Annotate SVG Screenshot – Exercise 4.1</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f0e0;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            max-width: 1100px;
+            background: white;
+            border-radius: 24px;
+            padding: 20px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #c45c00;
+            border-left: 5px solid #fb8c00;
+            padding-left: 15px;
+        }
+        .controls {
+            margin: 20px 0;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .controls label {
+            font-weight: bold;
+        }
+        canvas {
+            max-width: 100%;
+            border: 2px solid #ffd9a5;
+            border-radius: 16px;
+            background: #f0f0f0;
+            display: block;
+            margin: 0 auto;
+            cursor: crosshair;
+        }
+        .info {
+            background: #fff3e0;
+            padding: 15px;
+            border-radius: 16px;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+        button {
+            background: #fb8c00;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #2c1a0c;
+        }
+        button:hover {
+            background: #ffb74d;
+        }
+        .note {
+            margin-top: 10px;
+            color: #5d4030;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>✏️ Annotate your SVG screenshot</h1>
+    <p>1. Upload your full‑page screenshot (PNG or JPG).<br>
+    2. The annotations (arrows & labels) will be drawn automatically using the coordinates from your SVG code.<br>
+    3. If needed, you can <strong>click on the canvas</strong> to add extra arrows manually.<br>
+    4. Take a screenshot (e.g., with Snipping Tool) of the result and save it as your annotated image.</p>
+
+    <div class="controls">
+        <label>📸 Screenshot file:</label>
+        <input type="file" id="imageUpload" accept="image/png, image/jpeg, image/jpg">
+        <button id="resetBtn">Reset annotations</button>
+        <button id="saveHintBtn">💡 How to screenshot</button>
+    </div>
+
+    <canvas id="annotationCanvas" width="800" height="600"></canvas>
+
+    <div class="info">
+        <strong>📐 Pre‑defined annotations (based on the SVG example):</strong>
+        <ul>
+            <li>🔹 Sky rectangle: (0,0) to (800,600)</li>
+            <li>🔹 Sun circle: centre (700,80), radius 40</li>
+            <li>🔹 Grass ellipse: centre (400,520), rx=380, ry=100</li>
+            <li>🔹 House rectangle: (250,250) width 300 height 200</li>
+            <li>🔹 Roof path: points (230,250), (400,130), (570,250)</li>
+            <li>🔹 Door: (360,350) size 80x100</li>
+            <li>🔹 Windows group: translate(280,280) and translate(440,280) with inner rect (0,0)-(50,50)</li>
+            <li>🔹 Garden path: M400,450 Q450,500 500,550 Q550,580 600,570</li>
+            <li>🔹 Flower group translate(620,520) with circle (0,-35) r=12</li>
+            <li>🔹 Tree group translate(150,360) with ellipse (0,-20) rx=35 ry=40</li>
+            <li>🔹 Text: (400,580) anchor middle</li>
+        </ul>
+        <p>✅ You can <strong>click anywhere on the canvas</strong> to add a custom arrow + label. Just type the text and click OK.</p>
+        <p class="note">💡 <em>If the annotations don’t perfectly align with your screenshot because your SVG size differs, use the manual click tool to adjust.</em></p>
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById('annotationCanvas');
+    const ctx = canvas.getContext('2d');
+    let img = new Image();
+    let annotations = [];   // each annotation: {x, y, text, arrowEndX, arrowEndY? or just a line from x,y to target? We'll store start and end points}
+    let customMode = false;
+    let pendingArrow = null;
+
+    // Predefined annotations (arrow from a point to a point + label)
+    // We'll define them as { fromX, fromY, toX, toY, label }
+    const defaultAnnotations = [
+        // Sky rectangle
+        { fromX: 50, fromY: 30, toX: 10, toY: 10, label: "rect (0,0)" },
+        { fromX: 780, fromY: 580, toX: 790, toY: 590, label: "(800,600)" },
+        // Sun circle
+        { fromX: 700, fromY: 40, toX: 700, toY: 80, label: "cx=700, cy=80" },
+        { fromX: 740, fromY: 80, toX: 710, toY: 80, label: "r=40" },
+        // Grass ellipse
+        { fromX: 400, fromY: 400, toX: 400, toY: 500, label: "cx=400, cy=520" },
+        { fromX: 780, fromY: 520, toX: 730, toY: 520, label: "rx=380" },
+        // House rectangle
+        { fromX: 250, fromY: 220, toX: 250, toY: 250, label: "(250,250)" },
+        { fromX: 550, fromY: 450, toX: 550, toY: 450, label: "(550,450)" },
+        // Roof path
+        { fromX: 230, fromY: 260, toX: 230, toY: 250, label: "M 230 250" },
+        { fromX: 400, fromY: 120, toX: 400, toY: 130, label: "L 400 130" },
+        { fromX: 570, fromY: 260, toX: 570, toY: 250, label: "L 570 250" },
+        // Door
+        { fromX: 360, fromY: 340, toX: 360, toY: 350, label: "(360,350)" },
+        // Windows group
+        { fromX: 280, fromY: 270, toX: 280, toY: 280, label: "translate(280,280)" },
+        { fromX: 440, fromY: 270, toX: 440, toY: 280, label: "translate(440,280)" },
+        { fromX: 305, fromY: 305, toX: 305, toY: 305, label: "inner rect (0,0)" },
+        // Path garden
+        { fromX: 400, fromY: 440, toX: 400, toY: 450, label: "M 400 450" },
+        { fromX: 500, fromY: 560, toX: 500, toY: 550, label: "Q 450 500, 500 550" },
+        // Flower group
+        { fromX: 620, fromY: 510, toX: 620, toY: 520, label: "translate(620,520)" },
+        { fromX: 620, fromY: 480, toX: 620, toY: 485, label: "circle (0,-35) r=12" },
+        // Tree group
+        { fromX: 150, fromY: 350, toX: 150, toY: 360, label: "translate(150,360)" },
+        { fromX: 150, fromY: 330, toX: 150, toY: 340, label: "ellipse (0,-20) rx=35 ry=40" },
+        // Text
+        { fromX: 400, fromY: 570, toX: 400, toY: 580, label: "text (400,580) anchor=middle" }
+    ];
+
+    function drawAnnotations() {
+        if (!img.complete || img.naturalWidth === 0) return;
+        // Clear canvas and draw image
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx.drawImage(img, 0, 0, img.width, img.height);
+        
+        // Draw each annotation
+        annotations.forEach(ann => {
+            const { fromX, fromY, toX, toY, label } = ann;
+            // Scale coordinates if image size differs from original assumption (original assumed 800x600)
+            const scaleX = img.width / 800;
+            const scaleY = img.height / 600;
+            const startX = fromX * scaleX;
+            const startY = fromY * scaleY;
+            const endX = toX * scaleX;
+            const endY = toY * scaleY;
+            
+            // Draw arrow
+            ctx.beginPath();
+            ctx.moveTo(startX, startY);
+            ctx.lineTo(endX, endY);
+            ctx.strokeStyle = '#e63946';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            // Arrowhead
+            const angle = Math.atan2(endY - startY, endX - startX);
+            const arrowSize = 10;
+            const headX = endX;
+            const headY = endY;
+            ctx.beginPath();
+            ctx.moveTo(headX, headY);
+            ctx.lineTo(headX - arrowSize * Math.cos(angle - Math.PI/6), headY - arrowSize * Math.sin(angle - Math.PI/6));
+            ctx.lineTo(headX - arrowSize * Math.cos(angle + Math.PI/6), headY - arrowSize * Math.sin(angle + Math.PI/6));
+            ctx.fillStyle = '#e63946';
+            ctx.fill();
+            
+            // Draw label background
+            const textX = startX + (endX - startX)/2 + 10;
+            const textY = startY + (endY - startY)/2 - 5;
+            ctx.font = '14px "Segoe UI", sans-serif';
+            const textWidth = ctx.measureText(label).width;
+            ctx.fillStyle = 'rgba(255, 248, 225, 0.9)';
+            ctx.fillRect(textX - 5, textY - 18, textWidth + 10, 22);
+            ctx.fillStyle = '#b45f1b';
+            ctx.fillText(label, textX, textY - 5);
+        });
+    }
+
+    function loadImage(file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            img.src = e.target.result;
+            img.onload = function() {
+                // Reset annotations to default (but clone deep)
+                annotations = JSON.parse(JSON.stringify(defaultAnnotations));
+                drawAnnotations();
+            };
+        };
+        if (file) reader.readAsDataURL(file);
+    }
+
+    // Manual arrow addition on click
+    canvas.addEventListener('click', async (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        const clickX = (e.clientX - rect.left) * scaleX;
+        const clickY = (e.clientY - rect.top) * scaleY;
+        
+        // Ask for label
+        const label = prompt("Enter label for this arrow (e.g., 'circle cx=...'):", "custom point");
+        if (!label) return;
+        
+        // Ask for target point (or use same point for a simple label?)
+        const targetX = parseFloat(prompt("Target X coordinate (in original SVG coordinate system, e.g., 700):", Math.round(clickX / (img.width/800))));
+        const targetY = parseFloat(prompt("Target Y coordinate:", Math.round(clickY / (img.height/600))));
+        if (isNaN(targetX) || isNaN(targetY)) return;
+        
+        annotations.push({
+            fromX: Math.round(clickX / (img.width/800)),
+            fromY: Math.round(clickY / (img.height/600)),
+            toX: targetX,
+            toY: targetY,
+            label: label
+        });
+        drawAnnotations();
+    });
+
+    document.getElementById('imageUpload').addEventListener('change', (e) => {
+        if (e.target.files.length) loadImage(e.target.files[0]);
+    });
+    document.getElementById('resetBtn').addEventListener('click', () => {
+        annotations = JSON.parse(JSON.stringify(defaultAnnotations));
+        if (img.complete && img.naturalWidth) drawAnnotations();
+        else alert("Load an image first.");
+    });
+    document.getElementById('saveHintBtn').addEventListener('click', () => {
+        alert("To take a screenshot:\n- Windows: Snipping Tool or Win+Shift+S\n- Mac: Cmd+Shift+4\n- Then save as PNG and submit as your annotated image.");
+    });
+    
+    // Initial placeholder – user must upload
+    ctx.fillStyle = "#e8e0d0";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "#5d4030";
+    ctx.font = "16px sans-serif";
+    ctx.fillText("📸 Upload your screenshot above", 280, 300);
+</script>
+</body>
+</html>

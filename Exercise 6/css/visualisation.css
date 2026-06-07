@@ -1,0 +1,45 @@
+.responsive-svg-container svg {
+    background-color: #faf8f0;
+    border-radius: 12px;
+    border: 1px solid #e0d4c0;
+}
+
+.bar {
+    fill: #fb8c00;
+    transition: fill 0.2s ease;
+}
+
+.bar:hover {
+    fill: #e67a00;
+}
+
+.axis-label {
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 14px;
+    fill: #5a3e2b;
+}
+
+.axis path, .axis line {
+    stroke: #c0a878;
+    stroke-width: 1;
+}
+
+.axis text {
+    font-size: 12px;
+    fill: #5a3e2b;
+}
+
+.scatter-circle {
+    transition: r 0.1s ease;
+}
+
+.scatter-circle:hover {
+    r: 6;
+}
+
+.tooltip-group {
+    pointer-events: none;
+}
+.tooltip-text {
+    font-family: 'Segoe UI', sans-serif;
+}

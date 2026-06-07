@@ -8,7 +8,10 @@
 </head>
 <body>
     <div class="container">
+        <!-- This h1 will be selected and styled by D3 -->
         <h1>📊 D3.js Manipulation Demo</h1>
+
+        <!-- This paragraph will be selected by D3 and its style will be changed -->
         <p class="intro">This page demonstrates using D3 to select, style, and append elements.</p>
 
         <div class="demo-section">
@@ -16,19 +19,22 @@
             <p>This paragraph will also be styled by D3.</p>
         </div>
 
+        <!-- D3 will add a new paragraph inside this div -->
         <div class="demo-section" id="target-div">
             <h3>Target Div for Appending</h3>
             <p>D3 will add a new paragraph inside this div.</p>
         </div>
 
+        <!-- D3 will create an SVG and draw a rectangle here -->
         <div class="demo-section" id="svg-container">
             <h3>SVG Container</h3>
             <p>D3 will create an SVG and draw a rectangle here.</p>
         </div>
     </div>
 
-    <!-- Load D3 library and your custom script -->
+    <!-- Load the D3 library -->
     <script src="https://d3js.org/d3.v7.min.js"></script>
+    <!-- Load your custom D3 script -->
     <script src="js/d3-script.js"></script>
 </body>
 </html>

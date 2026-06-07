@@ -1,78 +1,25 @@
 (function() {
-    const margin = { top: 40, right: 20, bottom: 60, left: 60 };
-    const width = 500;
-    const height = 400;
-    const innerWidth = width - margin.left - margin.right;
-    const innerHeight = height - margin.top - margin.bottom;
-
-    const svg = d3.select("#bar-chart")
-        .append("svg")
-        .attr("viewBox", `0 0 ${width} ${height}`)
-        .style("background", "#faf8f0")
-        .append("g")
-        .attr("transform", `translate(${margin.left}, ${margin.top})`);
+    const margin = {top:40, right:20, bottom:60, left:60}, w=500, h=400;
+    const iw = w - margin.left - margin.right, ih = h - margin.top - margin.bottom;
+    const svg = d3.select("#bar-chart").append("svg").attr("viewBox", `0 0 ${w} ${h}`)
+        .append("g").attr("transform", `translate(${margin.left},${margin.top})`);
 
     d3.csv("data/TV_CLEANED.csv").then(data => {
-        // Filter 55-inch TVs only
-        const filtered = data.filter(d => +d.Screen_Size_Inches === 55 && d.Screen_tech && d.Power_Consumption);
-        
-        // Compute average power consumption per screen technology
-        const techMap = new Map();
-        filtered.forEach(d => {
-            const tech = d.Screen_tech;
-            const power = +d.Power_Consumption;
-            if (!techMap.has(tech)) techMap.set(tech, { total: 0, count: 0 });
-            const entry = techMap.get(tech);
-            entry.total += power;
-            entry.count++;
+        const filtered = data.filter(d => {
+            const inches = +d.screenshot_inches, power = +d.Avg_mode_power, tech = d.Screen_Techn;
+            return !isNaN(inches) && inches >= 54.5 && inches <= 55.5 && !isNaN(power) && tech;
         });
-        
-        const barData = Array.from(techMap, ([tech, { total, count }]) => ({
-            tech,
-            avgPower: total / count
-        }));
-        
-        barData.sort((a,b) => b.avgPower - a.avgPower);
-        
-        const xScale = d3.scaleBand()
-            .domain(barData.map(d => d.tech))
-            .range([0, innerWidth])
-            .padding(0.2);
-        
-        const yScale = d3.scaleLinear()
-            .domain([0, d3.max(barData, d => d.avgPower)])
-            .range([innerHeight, 0]);
-        
-        svg.selectAll("rect")
-            .data(barData)
-            .join("rect")
-            .attr("x", d => xScale(d.tech))
-            .attr("y", d => yScale(d.avgPower))
-            .attr("width", xScale.bandwidth())
-            .attr("height", d => innerHeight - yScale(d.avgPower))
-            .attr("fill", "#fb8c00")
-            .attr("rx", 4);
-        
-        // Axes
-        svg.append("g")
-            .attr("transform", `translate(0, ${innerHeight})`)
-            .call(d3.axisBottom(xScale))
-            .selectAll("text")
-            .attr("transform", "rotate(-30)")
-            .style("text-anchor", "end");
-        
-        svg.append("g").call(d3.axisLeft(yScale));
-        
-        svg.append("text")
-            .attr("x", innerWidth/2)
-            .attr("y", innerHeight + 40)
-            .attr("text-anchor", "middle")
-            .text("Screen Technology");
-        
-        svg.append("text")
-            .attr("x", -40)
-            .attr("y", 15)
-            .attr("text-anchor", "middle")
-            .text("Avg Power (Watts)");
-    }).catch(error => console.error(error));
+        if (filtered.length === 0) { svg.append("text").text("No 55-inch data").attr("x",10).attr("y",20).attr("fill","red"); return; }
+        const techMap = new Map();
+        filtered.forEach(d => { const t = d.Screen_Techn, p = +d.Avg_mode_power; techMap.set(t, (techMap.get(t)||0) + p); });
+        const barData = Array.from(techMap, ([t, total]) => ({ tech: t, avg: total / filtered.filter(d => d.Screen_Techn === t).length }));
+        barData.sort((a,b) => b.avg - a.avg);
+        const x = d3.scaleBand().domain(barData.map(d => d.tech)).range([0, iw]).padding(0.2);
+        const y = d3.scaleLinear().domain([0, d3.max(barData, d => d.avg)]).range([ih, 0]);
+        svg.selectAll("rect").data(barData).join("rect")
+            .attr("x", d => x(d.tech)).attr("y", d => y(d.avg)).attr("width", x.bandwidth())
+            .attr("height", d => ih - y(d.avg)).attr("fill", "#fb8c00");
+        svg.append("g").attr("transform", `translate(0,${ih})`).call(d3.axisBottom(x)).selectAll("text").attr("transform","rotate(-30)").style("text-anchor","end");
+        svg.append("g").call(d3.axisLeft(y));
+    }).catch(e => console.error(e));
 })();

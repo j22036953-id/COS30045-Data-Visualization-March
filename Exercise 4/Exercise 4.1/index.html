@@ -3,102 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SVG House and Garden – Exercise 4.1</title>
+    <title>SVG House and Garden - Exercise 4.1</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <style>
-        * {
-            box-sizing: border-box;
-        }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f5f0e0;
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .container {
-            max-width: 1100px;
-            background: white;
-            border-radius: 24px;
-            padding: 20px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-            margin-bottom: 30px;
-        }
-        h1, h2 {
-            color: #c45c00;
-            border-left: 5px solid #fb8c00;
-            padding-left: 15px;
-        }
-        .svg-container {
-            text-align: center;
-            background: #e8f0e8;
-            padding: 10px;
-            border-radius: 16px;
-            border: 2px solid #ffd9a5;
-        }
-        svg {
-            max-width: 100%;
-            height: auto;
-            background: #cfe8cf;
-        }
-        .annotation-tool {
-            margin-top: 30px;
-            border-top: 3px dashed #fb8c00;
-            padding-top: 20px;
-        }
-        .controls {
-            margin: 20px 0;
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-            align-items: center;
-        }
-        canvas {
-            max-width: 100%;
-            border: 2px solid #ffd9a5;
-            border-radius: 16px;
-            background: #f0f0f0;
-            display: block;
-            margin: 0 auto;
-            cursor: crosshair;
-        }
-        button {
-            background: #fb8c00;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 40px;
-            font-weight: bold;
-            cursor: pointer;
-            color: #2c1a0c;
-        }
-        button:hover {
-            background: #ffb74d;
-        }
-        .info {
-            background: #fff3e0;
-            padding: 15px;
-            border-radius: 16px;
-            margin-top: 20px;
-            font-size: 14px;
-        }
-        .note {
-            margin-top: 10px;
-            color: #5d4030;
-        }
-        .final-images img {
-            max-width: 100%;
-            margin-bottom: 20px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-        }
+        /* You can move this CSS to your external styles.css if you prefer */
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 1000px; margin: 2rem auto; padding: 1rem; background: #f0f7f0; }
+        h1 { color: #2c5e2e; }
+        .svg-container { border: 2px solid #ccc; border-radius: 16px; background: #e8f0e8; display: inline-block; padding: 10px; }
+        .annotation { margin-top: 2rem; background: #fff3e0; padding: 1rem; border-radius: 12px; }
+        img { max-width: 100%; border: 1px solid #aaa; margin-top: 1rem; }
     </style>
 </head>
 <body>
-<div class="container">
     <h1>🏡 SVG House and Garden – Exercise 4.1</h1>
     <div class="svg-container">
-        <svg width="800" height="600" viewBox="0 0 800 600" style="border:1px solid #6b8c6b;">
+        <!-- ***** THIS IS YOUR SVG DRAWING ***** -->
+        <svg width="800" height="600" viewBox="0 0 800 600" style="background: #cfe8cf; border:1px solid #6b8c6b;">
             <!-- Sky -->
             <rect x="0" y="0" width="800" height="600" fill="#b3d9ff" />
             <!-- Sun -->
@@ -116,7 +37,7 @@
             <!-- Door -->
             <rect x="360" y="350" width="80" height="100" fill="#8B4513" stroke="#5D3A1A" stroke-width="3" rx="5" />
             <circle cx="425" cy="400" r="5" fill="#FFD700" />
-            <!-- Windows (grouped with translate) -->
+            <!-- Windows (grouped) -->
             <g fill="#ADD8E6" stroke="#000" stroke-width="2" transform="translate(280,280)">
                 <rect x="0" y="0" width="50" height="50" />
                 <line x1="25" y1="0" x2="25" y2="50" stroke="#000" stroke-width="1" />
@@ -147,184 +68,21 @@
         </svg>
     </div>
 
-    <!-- ========== ANNOTATION TOOL (after the SVG) ========== -->
-    <div class="annotation-tool">
-        <h2>✏️ Annotate your screenshot</h2>
-        <p>1. Take a full‑page screenshot of the SVG above.<br>
-        2. Upload that screenshot here – arrows and labels will be drawn automatically using the same coordinates.<br>
-        3. If needed, <strong>click on the canvas</strong> to add extra arrows manually.<br>
-        4. Take a screenshot of the annotated canvas and save it as your submission image.</p>
-
-        <div class="controls">
-            <label>📸 Upload screenshot:</label>
-            <input type="file" id="imageUpload" accept="image/png, image/jpeg, image/jpg">
-            <button id="resetBtn">Reset annotations</button>
-        </div>
-
-        <canvas id="annotationCanvas" width="800" height="600"></canvas>
-
-        <div class="info">
-            <strong>✅ Pre‑loaded correct annotations:</strong>
-            <ul>
-                <li>Sky: rect (0,0) and (800,600)</li>
-                <li>Sun: cx=700, cy=80, r=40</li>
-                <li>Grass ellipse: cx=400, cy=520, rx=380, ry=100</li>
-                <li>House: rect (250,250) and (550,450)</li>
-                <li>Roof path: M 230 250, L 400 130, L 570 250</li>
-                <li>Door: rect (360,350) size 80x100</li>
-                <li>Windows: translate(280,280) and translate(440,280) with inner rect (0,0)</li>
-                <li>Garden path: M 400 450, Q 450 500, 500 550</li>
-                <li>Flower group: translate(620,520), circle (0,-35) r=12</li>
-                <li>Tree group: translate(150,360), ellipse (0,-20) rx=35 ry=40</li>
-                <li>Text: (400,580) anchor=middle</li>
-            </ul>
-            <p class="note">💡 <strong>Manual mode:</strong> Click anywhere on the canvas → enter a label → enter target X,Y (original SVG coordinates, e.g., 700 80). This adds custom arrows.</p>
-            <p class="note">📸 After annotating, take a screenshot and save as PNG/JPEG. Place it in the <code>images/</code> folder and reference below.</p>
-        </div>
+    <!-- ***** YOUR EXISTING ANNOTATION TOOL AND SCREENSHOTS SECTION ***** -->
+    <div class="annotation">
+        <h2>📝 Annotated Screenshots</h2>
+        <p>Below are screenshots of the SVG with coordinate annotations.</p>
+        <img src="images/annotated-1.jpg" alt="Annotated screenshot 1 - shapes">
+        <img src="images/annotated-2.jpeg" alt="Annotated screenshot 2 - grouping and transform">
+        <p><strong>Figure 1:</strong> Coordinates shown for rectangle, circle, ellipse, line, path, text.</p>
+        <p><strong>Figure 2:</strong> Group (<code>&lt;g&gt;</code>) with <code>transform="translate(...)"</code> and how it affects window positions.</p>
     </div>
 
-    <!-- ========== FINAL ANNOTATED IMAGES (using your actual file names) ========== -->
-    <div class="container final-images" style="margin-top: 30px;">
-        <h2>📝 Final annotated screenshots</h2>
-        <p><strong>Figure 1:</strong> Overview with all coordinate labels.</p>
-        <img src="images/annotated-1.jpg" alt="Annotated screenshot 1" style="max-width:100%; border:1px solid #ccc; border-radius:8px;">
-        
-        <p><strong>Figure 2:</strong> Close-up or second view focusing on <code>&lt;g&gt;</code> grouping and <code>transform="translate(...)"</code>.</p>
-        <img src="images/annotated-2.jpeg" alt="Annotated screenshot 2 (group focus)" style="max-width:100%; border:1px solid #ccc; border-radius:8px;">
-        
-        <p>Also include a <strong>DOM inspector screenshot</strong> showing the expanded SVG tree (F12 → Elements tab).</p>
-        <!-- If you have a DOM screenshot, add it below with correct file name -->
-        <!-- <img src="images/dom-screenshot.png" alt="DOM tree" style="max-width:100%;"> -->
+    <div class="annotation">
+        <h2>🖥️ DOM Inspector View</h2>
+        <p>Screenshot of browser DevTools showing the SVG element and its children:</p>
+        <img src="images/dom-screenshot.jpg" alt="DOM tree screenshot">
+        <p>Open DevTools (F12), go to Elements tab, expand <code>&lt;svg&gt;</code> to see all shapes.</p>
     </div>
-</div>
-
-<script>
-    const canvas = document.getElementById('annotationCanvas');
-    const ctx = canvas.getContext('2d');
-    let img = new Image();
-    let annotations = [];
-
-    // Correct default annotations (based on the SVG coordinates)
-    const defaultAnnotations = [
-        { fromX: 50, fromY: 30, toX: 10, toY: 10, label: "rect (0,0)" },
-        { fromX: 770, fromY: 570, toX: 790, toY: 590, label: "(800,600)" },
-        { fromX: 700, fromY: 40, toX: 700, toY: 80, label: "cx=700, cy=80" },
-        { fromX: 740, fromY: 80, toX: 710, toY: 80, label: "r=40" },
-        { fromX: 400, fromY: 400, toX: 400, toY: 500, label: "cx=400, cy=520" },
-        { fromX: 780, fromY: 520, toX: 730, toY: 520, label: "rx=380" },
-        { fromX: 400, fromY: 600, toX: 400, toY: 560, label: "ry=100" },
-        { fromX: 250, fromY: 220, toX: 250, toY: 250, label: "rect (250,250)" },
-        { fromX: 550, fromY: 450, toX: 550, toY: 450, label: "(550,450)" },
-        { fromX: 230, fromY: 260, toX: 230, toY: 250, label: "M 230 250" },
-        { fromX: 400, fromY: 120, toX: 400, toY: 130, label: "L 400 130" },
-        { fromX: 570, fromY: 260, toX: 570, toY: 250, label: "L 570 250" },
-        { fromX: 360, fromY: 340, toX: 360, toY: 350, label: "rect (360,350)" },
-        { fromX: 280, fromY: 270, toX: 280, toY: 280, label: "translate(280,280)" },
-        { fromX: 440, fromY: 270, toX: 440, toY: 280, label: "translate(440,280)" },
-        { fromX: 305, fromY: 305, toX: 305, toY: 305, label: "inner rect (0,0)" },
-        { fromX: 400, fromY: 440, toX: 400, toY: 450, label: "M 400 450" },
-        { fromX: 500, fromY: 560, toX: 500, toY: 550, label: "Q 450 500, 500 550" },
-        { fromX: 620, fromY: 510, toX: 620, toY: 520, label: "translate(620,520)" },
-        { fromX: 620, fromY: 480, toX: 620, toY: 485, label: "circle (0,-35) r=12" },
-        { fromX: 150, fromY: 350, toX: 150, toY: 360, label: "translate(150,360)" },
-        { fromX: 150, fromY: 330, toX: 150, toY: 340, label: "ellipse (0,-20) rx=35 ry=40" },
-        { fromX: 400, fromY: 570, toX: 400, toY: 580, label: "text (400,580) anchor=middle" }
-    ];
-
-    function drawAnnotations() {
-        if (!img.complete || img.naturalWidth === 0) return;
-        canvas.width = img.width;
-        canvas.height = img.height;
-        ctx.drawImage(img, 0, 0, img.width, img.height);
-        
-        const scaleX = img.width / 800;
-        const scaleY = img.height / 600;
-        
-        annotations.forEach(ann => {
-            const { fromX, fromY, toX, toY, label } = ann;
-            const startX = fromX * scaleX;
-            const startY = fromY * scaleY;
-            const endX = toX * scaleX;
-            const endY = toY * scaleY;
-            
-            ctx.beginPath();
-            ctx.moveTo(startX, startY);
-            ctx.lineTo(endX, endY);
-            ctx.strokeStyle = '#e63946';
-            ctx.lineWidth = 2;
-            ctx.stroke();
-            const angle = Math.atan2(endY - startY, endX - startX);
-            const arrowSize = 10;
-            const headX = endX;
-            const headY = endY;
-            ctx.beginPath();
-            ctx.moveTo(headX, headY);
-            ctx.lineTo(headX - arrowSize * Math.cos(angle - Math.PI/6), headY - arrowSize * Math.sin(angle - Math.PI/6));
-            ctx.lineTo(headX - arrowSize * Math.cos(angle + Math.PI/6), headY - arrowSize * Math.sin(angle + Math.PI/6));
-            ctx.fillStyle = '#e63946';
-            ctx.fill();
-            
-            const textX = startX + (endX - startX)/2 + 10;
-            const textY = startY + (endY - startY)/2 - 5;
-            ctx.font = '14px "Segoe UI", sans-serif';
-            const textWidth = ctx.measureText(label).width;
-            ctx.fillStyle = 'rgba(255, 248, 225, 0.9)';
-            ctx.fillRect(textX - 5, textY - 18, textWidth + 10, 22);
-            ctx.fillStyle = '#b45f1b';
-            ctx.fillText(label, textX, textY - 5);
-        });
-    }
-
-    function loadImage(file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            img.src = e.target.result;
-            img.onload = function() {
-                annotations = JSON.parse(JSON.stringify(defaultAnnotations));
-                drawAnnotations();
-            };
-        };
-        if (file) reader.readAsDataURL(file);
-    }
-
-    canvas.addEventListener('click', async (e) => {
-        if (!img.complete || img.naturalWidth === 0) return;
-        const rect = canvas.getBoundingClientRect();
-        const scaleX = canvas.width / rect.width;
-        const scaleY = canvas.height / rect.height;
-        const clickX = (e.clientX - rect.left) * scaleX;
-        const clickY = (e.clientY - rect.top) * scaleY;
-        
-        const label = prompt("Enter label for this arrow:", "custom point");
-        if (!label) return;
-        const targetX = parseFloat(prompt("Target X coordinate (0-800):", Math.round(clickX / (img.width/800))));
-        const targetY = parseFloat(prompt("Target Y coordinate (0-600):", Math.round(clickY / (img.height/600))));
-        if (isNaN(targetX) || isNaN(targetY)) return;
-        
-        annotations.push({
-            fromX: Math.round(clickX / (img.width/800)),
-            fromY: Math.round(clickY / (img.height/600)),
-            toX: targetX,
-            toY: targetY,
-            label: label
-        });
-        drawAnnotations();
-    });
-
-    document.getElementById('imageUpload').addEventListener('change', (e) => {
-        if (e.target.files.length) loadImage(e.target.files[0]);
-    });
-    document.getElementById('resetBtn').addEventListener('click', () => {
-        if (!img.complete || img.naturalWidth === 0) { alert("Load an image first."); return; }
-        annotations = JSON.parse(JSON.stringify(defaultAnnotations));
-        drawAnnotations();
-    });
-
-    ctx.fillStyle = "#e8e0d0";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = "#5d4030";
-    ctx.font = "16px sans-serif";
-    ctx.fillText("📸 Upload a screenshot of the SVG above", 250, 300);
-</script>
 </body>
 </html>

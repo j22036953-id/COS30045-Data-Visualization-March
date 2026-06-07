@@ -3,33 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Exercise 5 – D3 Multi‑chart Dashboard</title>
-    <link rel="stylesheet" href="css/styles.css">
+    <title>Exercise 5 – TV Energy Dashboard</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: #f5f0e0;
-            margin: 0;
             padding: 20px;
         }
         .container {
             max-width: 1400px;
             margin: 0 auto;
             background: white;
-            padding: 2rem;
             border-radius: 28px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            padding: 2rem;
         }
         h1 {
             color: #c45c00;
             border-left: 5px solid #fb8c00;
             padding-left: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        .subtitle {
+            color: #5d4030;
+            margin-bottom: 2rem;
+            font-size: 1rem;
         }
         .chart-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(550px, 1fr));
             gap: 2rem;
-            margin: 2rem 0;
         }
         .chart-card {
             background: #fffef9;
@@ -37,57 +45,64 @@
             padding: 1rem;
             box-shadow: 0 2px 8px rgba(0,0,0,0.05);
             border: 1px solid #ffe0b5;
+            display: flex;
+            flex-direction: column;
+            overflow: visible;   /* prevent clipping */
         }
         .chart-title {
             text-align: center;
-            font-size: 1.3rem;
+            font-size: 1.2rem;
             font-weight: bold;
             margin-bottom: 1rem;
             color: #c45c00;
         }
         .responsive-svg-container {
-            margin: 0 auto;
             width: 100%;
+            min-height: 450px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: visible;
         }
         footer {
             text-align: center;
             margin-top: 2rem;
             font-size: 0.85rem;
             color: #7f8c8d;
+            border-top: 1px solid #ffe0b5;
+            padding-top: 1rem;
+        }
+        @media (max-width: 700px) {
+            .chart-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
 <div class="container">
     <h1>📺 TV Energy Consumption Dashboard</h1>
-    <p>Interactive D3 charts exploring Australian TV energy data.</p>
+    <div class="subtitle">Interactive D3 charts exploring Australian TV energy data</div>
 
     <div class="chart-grid">
-        <!-- Donut chart card -->
         <div class="chart-card">
             <div class="chart-title">Screen Technology Distribution</div>
             <div id="donut-chart" class="responsive-svg-container"></div>
         </div>
-
-        <!-- Bar chart (55-inch TVs) card -->
         <div class="chart-card">
-            <div class="chart-title">Avg Power Consumption (55" TVs)</div>
+            <div class="chart-title">Avg Power for 55‑inch TVs</div>
             <div id="bar-chart" class="responsive-svg-container"></div>
         </div>
-
-        <!-- Scatter plot card -->
         <div class="chart-card">
-            <div class="chart-title">Star Rating vs Power Consumption</div>
+            <div class="chart-title">Screen Size vs. Power Consumption</div>
             <div id="scatter-plot" class="responsive-svg-container"></div>
         </div>
-
-        <!-- Line chart card -->
         <div class="chart-card">
             <div class="chart-title">Spot Power Prices (1998–2024)</div>
             <div id="line-chart" class="responsive-svg-container"></div>
         </div>
     </div>
-    <footer>Data sources: Australian Government TV dataset & simulated power prices</footer>
+    <footer>Data source: Australian Government TV dataset & simulated power prices (AEMO trend)</footer>
 </div>
 
 <script src="https://d3js.org/d3.v7.min.js"></script>

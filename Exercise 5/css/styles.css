@@ -157,3 +157,11 @@ footer {
         font-size: 1rem;
     }
 }
+
+/* Additional custom styling if needed */
+.responsive-svg-container svg {
+    display: block;
+    margin: 0 auto;
+    background: #faf8f0;
+    border-radius: 12px;
+}

@@ -1,19 +1,7 @@
 (function() {
-    // Hardcoded data (replace with CSV later)
-    const weatherData = [
-        { date: new Date(2024, 0, 7), avgTemp: 21.7, minTemp: 16.2, maxTemp: 26.4 },
-        { date: new Date(2024, 0, 14), avgTemp: 20.9, minTemp: 15.5, maxTemp: 25.3 },
-        { date: new Date(2024, 0, 21), avgTemp: 19.9, minTemp: 14.2, maxTemp: 23.8 },
-        { date: new Date(2024, 0, 28), avgTemp: 20.4, minTemp: 14.8, maxTemp: 24.5 },
-        { date: new Date(2024, 1, 4), avgTemp: 20.0, minTemp: 15.0, maxTemp: 23.6 },
-        { date: new Date(2024, 1, 11), avgTemp: 21.6, minTemp: 15.2, maxTemp: 26.0 },
-        { date: new Date(2024, 1, 18), avgTemp: 22.0, minTemp: 16.0, maxTemp: 27.0 },
-        { date: new Date(2024, 1, 25), avgTemp: 21.1, minTemp: 15.1, maxTemp: 25.8 }
-    ];
-
-    const margin = { top: 40, right: 30, bottom: 50, left: 50 };
-    const width = 800;
-    const height = 500;
+    const margin = { top: 40, right: 20, bottom: 60, left: 60 };
+    const width = 500;
+    const height = 400;
     const innerWidth = width - margin.left - margin.right;
     const innerHeight = height - margin.top - margin.bottom;
 
@@ -21,45 +9,53 @@
         .append("svg")
         .attr("viewBox", `0 0 ${width} ${height}`)
         .style("background", "#faf8f0")
-        .style("border", "1px solid #ccc")
         .append("g")
-        .attr("transform", `translate(${margin.left},${margin.top})`);
+        .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
-    const xScale = d3.scaleTime()
-        .domain(d3.extent(weatherData, d => d.date))
+    // Simulated power price data (year, average spot price)
+    const data = [
+        { year: 1998, price: 25 }, { year: 2000, price: 28 }, { year: 2002, price: 35 },
+        { year: 2004, price: 42 }, { year: 2006, price: 55 }, { year: 2008, price: 70 },
+        { year: 2010, price: 65 }, { year: 2012, price: 60 }, { year: 2014, price: 75 },
+        { year: 2016, price: 80 }, { year: 2018, price: 90 }, { year: 2020, price: 85 },
+        { year: 2022, price: 110 }, { year: 2024, price: 120 }
+    ];
+    
+    const xScale = d3.scaleLinear()
+        .domain(d3.extent(data, d => d.year))
         .range([0, innerWidth]);
-
+    
     const yScale = d3.scaleLinear()
-        .domain([0, d3.max(weatherData, d => d.maxTemp)])
+        .domain([0, d3.max(data, d => d.price)])
         .range([innerHeight, 0]);
-
+    
     const lineGen = d3.line()
-        .x(d => xScale(d.date))
-        .y(d => yScale(d.avgTemp))
+        .x(d => xScale(d.year))
+        .y(d => yScale(d.price))
         .curve(d3.curveCatmullRom);
-
+    
     svg.append("path")
-        .attr("d", lineGen(weatherData))
+        .attr("d", lineGen(data))
         .attr("fill", "none")
         .attr("stroke", "#e67a00")
         .attr("stroke-width", 3);
-
-    const xAxis = d3.axisBottom(xScale).tickFormat(d3.timeFormat("%b"));
+    
+    // Axes
     svg.append("g")
         .attr("transform", `translate(0, ${innerHeight})`)
-        .call(xAxis);
-
+        .call(d3.axisBottom(xScale).tickFormat(d3.format("d")));
+    
     svg.append("g").call(d3.axisLeft(yScale));
-
+    
+    svg.append("text")
+        .attr("x", innerWidth/2)
+        .attr("y", innerHeight + 40)
+        .attr("text-anchor", "middle")
+        .text("Year");
+    
     svg.append("text")
         .attr("x", -40)
         .attr("y", 15)
         .attr("text-anchor", "middle")
-        .text("Temperature (°C)");
-
-    svg.append("text")
-        .attr("x", innerWidth / 2)
-        .attr("y", innerHeight + 40)
-        .attr("text-anchor", "middle")
-        .text("Week");
+        .text("Spot Price ($/MWh)");
 })();

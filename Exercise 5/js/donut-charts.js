@@ -1,63 +1,55 @@
-function drawDonutCharts(data) {
-    const years = [1991, 2010, 2020, 2024];
-    const donutContainer = d3.select("#donut-charts");
+(function() {
+    const width = 400;
+    const height = 400;
+    const radius = Math.min(width, height) / 2;
 
-    // For each year, create a card and an SVG
-    years.forEach(year => {
-        // Find the data row for this year
-        const yearData = data.find(d => d.year === year);
-        if (!yearData) return;
+    const svg = d3.select("#donut-chart")
+        .append("svg")
+        .attr("viewBox", `0 0 ${width} ${height}`)
+        .style("background", "#faf8f0")
+        .append("g")
+        .attr("transform", `translate(${width/2}, ${height/2})`);
 
-        // Prepare data for pie: array of objects { format, production }
-        const pieData = formatsInfo.map(f => ({
-            format: f.id,
-            production: yearData[f.id]
-        }));
+    d3.csv("data/TV_CLEANED.csv").then(data => {
+        // Count models per Screen_tech
+        const techCounts = new Map();
+        data.forEach(d => {
+            const tech = d.Screen_tech;
+            if (tech) techCounts.set(tech, (techCounts.get(tech) || 0) + 1);
+        });
 
-        // Create a card div
-        const card = donutContainer.append("div")
-            .attr("class", "donut-card");
+        const pieData = Array.from(techCounts, ([tech, count]) => ({ tech, count }));
 
-        // Add year title
-        card.append("h3").text(year).style("margin", "0 0 10px 0");
+        const color = d3.scaleOrdinal()
+            .domain(pieData.map(d => d.tech))
+            .range(d3.schemeTableau10);
 
-        // Create SVG container inside the card
-        const pieChartSize = 200;
-        const svg = card.append("svg")
-            .attr("width", pieChartSize)
-            .attr("height", pieChartSize)
-            .append("g")
-            .attr("transform", `translate(${pieChartSize/2}, ${pieChartSize/2})`);
-
-        // Pie generator
         const pie = d3.pie()
-            .value(d => d.production)
-            .sort(null);   // keep order as in pieData
+            .value(d => d.count)
+            .sort(null);
 
-        const arcs = pie(pieData);
-
-        // Arc generator for donut (inner radius > 0)
         const arcGen = d3.arc()
-            .innerRadius(60)
-            .outerRadius(90)
+            .innerRadius(80)   // donut hole
+            .outerRadius(radius - 20)
             .padAngle(0.02)
             .cornerRadius(4);
 
-        // Draw arcs
+        const arcs = pie(pieData);
+
         svg.selectAll("path")
             .data(arcs)
             .join("path")
             .attr("d", arcGen)
-            .attr("fill", d => colorScale(d.data.format))
+            .attr("fill", d => color(d.data.tech))
             .attr("stroke", "white")
             .style("stroke-width", "2px");
 
-        // Add small percentage label in the centre (optional)
+        // Add a centre label
         svg.append("text")
-            .text(`${year}`)
+            .text("TV Tech")
             .attr("text-anchor", "middle")
             .attr("dominant-baseline", "middle")
-            .style("font-size", "14px")
-            .style("fill", "#555");
-    });
-}
+            .style("font-size", "16px")
+            .style("fill", "#333");
+    }).catch(error => console.error("Error loading TV data:", error));
+})();
